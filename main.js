@@ -1,10 +1,29 @@
-var express = require("express");
-var app = express();
-var port = 3000;
+const express = require("express");
+const { sequelize } = require('./models'); // sequelize 객체 가져오기
+const bodyParser = require('body-parser');
+const app = express();
 
-app.listen(port,()=>{
-    console.log("서버 실행");
+const PORT = 3000;
+
+//* DB connection & sync
+sequelize
+    .sync({ force: false })
+    .then(() => {
+    	console.log('db connection success...!');
+    })
+    .catch(err => {
+    	console.error(err);
+    });
+
+app.use(express.json()); // JSON 형식의 body 파싱
+app.use(bodyParser.urlencoded({ extended: false }));
+
+// router
+var userRouter = require('./router/userRouter');
+
+// routing
+app.use('/user', userRouter);
+
+app.listen(PORT,()=>{ //실행 시 npm run dev 입력하면 파일 수정 시 서버 자동 재시작
+    console.log(`Server is listening on ${PORT}`);
 });
-app.get("/", (req, res)=>{
-    res.send("test");
-})
