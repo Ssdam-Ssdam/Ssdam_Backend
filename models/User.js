@@ -1,4 +1,5 @@
 const Sequelize = require('sequelize'); // 쿼리문 쓰지 않고 db 데이터 처리 가능한 모듈
+const { FOREIGNKEYS } = require('sequelize/lib/query-types');
 // config/config.json에서 db 연결 정보 저장
 
 const User = class User extends Sequelize.Model {
@@ -47,10 +48,13 @@ const User = class User extends Sequelize.Model {
    static associate(db) {
       /*
        * 따로 외래키를 지정하지않으면, 모델명+기본키 컬럼이 생성되서 자동으로 연결된다.
-       * 즉, User와 id가 합쳐져서 Userid라는 필드가 생겨서 자동연결해준다.
-       * db.User.hasMany(db.Post, { foreignKey: 'Userid', targetKey: 'id' })
-       */
-    //   db.User.hasMany(db.Post); -> 예시
+       * 즉, User와 id가 합쳐져서 Userid라는 필드가 생겨서 자동연결해준다.*/
+
+      db.User.hasMany(db.Address, {
+         foreignKey: 'userId', // Address 테이블의 외래 키
+         sourceKey: 'userId',  // User 테이블의 기본 키
+         as: 'Addresses',      // 관계를 참조할 때 사용할 별칭
+       });
    }
 };
 
