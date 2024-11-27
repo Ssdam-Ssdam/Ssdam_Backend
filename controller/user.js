@@ -2,6 +2,7 @@ const User = require('../models/User'); //user 테이블 객체 불러오기
 const Address = require('../models/Address'); // address 테이블 객체 불러오기
 const jwt = require('jsonwebtoken'); //토큰 모듈
 const { sequelize } = require('../models');
+const { where } = require('sequelize');
 
 const ACCESS_KEY = `access_secret_key`;
 
@@ -33,7 +34,7 @@ const login = async (req, res) => {
                 );
 
                 // 응답 시 Authorization header에 token 설정 후 client로 전송
-                res.set('Authorization', 'Bearer' + accessToken);
+                res.set('Authorization', 'Bearer ' + accessToken);
 
                 res.status(200).json({
                     "message": "login success",
@@ -110,7 +111,7 @@ const user_delete = async (req, res) => {
             }
         })
 
-        if(user.length === 0){
+        if(!user){
             res.status(404).json({
                 "message": "user not found"
             })
@@ -162,14 +163,6 @@ const profile = async (req, res) => {
             full_address += address.sub_region + ' ';
         }
 
-        if (address.street) {
-            full_address += address.street + ' ';
-        }
-
-        if (address.detail_address) {
-            full_address += address.detail_address;
-        }
-
         // 공백을 마지막에 하나만 남기도록 처리
         full_address = full_address.trim();
 
@@ -178,6 +171,151 @@ const profile = async (req, res) => {
             "userId": user.userId,
             "name": user.userName,
             "address": full_address
+        })
+    } catch(err) {
+        console.log(`error: ${err}`);
+        res.status(500).json({
+            "error": err,
+            "message": "Internal Server Error"
+        })
+    }
+}
+
+const profile_update = async (req, res) => {
+    const userId = req.userId;
+
+    try {
+        const t = await sequelize.transaction();
+
+        const user = await User.findOne({
+            where: {
+                userId: userId
+            }
+        }, {
+            transaction: t
+        });
+
+        const address = await Address.findOne({
+            where: {
+                userId: userId
+            }
+        }, {
+            transaction: t
+        });
+
+        await t.commit();
+
+        var sim_address = '';
+        var full_address = '';
+
+        if (address.region) {
+            sim_address += address.region + ' ';
+            full_address += address.region + ' ';
+        }
+    
+        if (address.sub_region) {
+            sim_address += address.sub_region + ' ';
+            full_address += address.sub_region + ' ';
+        }
+    
+        if (address.street) {
+            full_address += address.street + ' ';
+        }
+    
+        if (address.detail_address) {
+            full_address += address.detail_address;
+        }
+    
+        // 공백을 마지막에 하나만 남기도록 처리
+        sim_address = sim_address.trim();
+        full_address = full_address.trim();
+
+        res.status(200).json({
+            "message": "user information call successful",
+            userId: user.userId,
+            password: user.password,
+            name: user.userName,
+            email: user.userEmail,
+            sim_address: sim_address,
+            address: full_address
+
+        })
+    } catch(err) {
+        console.log(`error: ${err}`);
+        res.status(500).json({
+            "error": err,
+            "message": "Internal Server Error"
+        })
+    }
+}
+
+const profile_update_process = async (req, res) => {
+    const userId = req.userId;
+    const { password, name, email, region, sub_region, street, detail_address, zonecode } = req.body;
+
+    try {
+        const t = await sequelize.transaction();
+
+        await User.update({
+            password: password, 
+            userName: name,
+            userEmail: email
+        }, {
+            where: {
+                userId: userId
+            }
+        }, {
+            transaction: t
+        });
+
+        await Address.update({
+            region: region,
+            sub_region: sub_region,
+            street: street,
+            detail_address: detail_address,
+            zonecode: zonecode
+        }, {
+            where: {
+                userId: userId
+            }
+        }, {transaction: t
+
+        });
+
+        await t.commit();
+
+        const user = await User.findOne({
+            where: {
+                userId: userId
+            }
+        })
+
+        const address = await Address.findOne({
+            where: {
+                userId: userId
+            }
+        })
+
+        var full_address = '';
+
+        if (address.region) {
+            full_address += address.region + ' ';
+        }
+
+        if (address.sub_region) {
+            full_address += address.sub_region + ' ';
+        }
+
+        // 공백을 마지막에 하나만 남기도록 처리
+        full_address = full_address.trim();
+
+        res.status(200).json({
+            "message": "user information updated successfully",
+            userId: user.userId,
+            password: user.password,
+            name: user.userName,
+            email: user.userEmail,
+            address: full_address
         })
     } catch(err) {
         console.log(`error: ${err}`);
@@ -224,5 +362,7 @@ module.exports = {
     register,
     user_delete,
     profile,
+    profile_update,
+    profile_update_process,
     checkDuplicateId
 }
