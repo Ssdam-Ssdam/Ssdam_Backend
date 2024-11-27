@@ -38,7 +38,7 @@ async function authenticateAccessToken(req, res, next) {
 // 관리자용 계정 검증
 async function authenticateAdmin(req, res, next) {
     if(!req.is_admin){ // 사용자용 계정일 때
-        res.status(403).json({
+        return res.status(403).json({
             "message": "Permission denied" // 권한 없음
         })
     } else {
