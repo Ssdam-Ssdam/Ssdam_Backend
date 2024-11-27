@@ -78,7 +78,68 @@ const register = (req, res) => {
     })
 }
 
+const user_delete = async (req, res) => {
+    const userId = req.userId;
+
+    try {
+        const user = await User.destroy({
+            where: {
+                userId: userId
+            }
+        })
+
+        if(user.length === 0){
+            res.status(404).json({
+                "message": "user not found"
+            })
+        } else {
+            res.status(200).json({
+                "message": "user deleted successfully"
+            })
+        }
+    } catch(err) {
+        console.log(`error: ${err}`);
+        res.status(500).json({
+            "error": err,
+            "message": "Internal Server Error"
+        })
+    }
+}
+
+// 아이디 중복 확인
+const checkDuplicateId = async (req, res) => {
+    const { userId } = req.body;
+
+    try {
+        const user = await User.findAll({
+            where: {
+                userId: userId
+            }
+        })
+
+        var is_available = false;
+        var message = `The userId is already taken.`
+        if(user.length === 0) { // 아이디 설정 가능 
+            is_available = true;
+            message = `The userId is available.`;
+        }
+
+        res.status(200).json({
+            is_available,
+            "message": message
+        })
+    } catch(err) {
+        console.log(`error: ${err}`);
+        res.status(500).json({
+            "error": err,
+            "message": "Internal Server Error"
+        })
+    }
+}
+
 module.exports = {
     login,
-    register
+    register,
+    user_delete,
+    checkDuplicateId
 }
