@@ -1,36 +1,42 @@
 const Sequelize = require('sequelize'); // 쿼리문 쓰지 않고 db 데이터 처리 가능한 모듈
 // config/config.json에서 db 연결 정보 저장
 
-const Address = class Address extends Sequelize.Model {
+const Inquiry = class Inquiry extends Sequelize.Model {
    static init(sequelize) {
       return super.init( //address 필드 정의
          {
-            addressId: {
+            inquiryId: {
                 type: Sequelize.INTEGER,
                 allowNull: false,
                 unique: true,
                 primaryKey: true,
                 autoIncrement: true
             },
-            region: {
+            title: {
                 type: Sequelize.STRING,
                 allowNull: false
             },
-            sub_region: {
+            content: {
                 type: Sequelize.STRING,
-                allowNull: true
-            },
-            street: {
-                type: Sequelize.STRING,
-                allowNull: true
-            },
-            detail_address: {
-                type: Sequelize.STRING,
-                allowNull: true
-            },
-            zonecode: {
-                type: Sequelize.INTEGER,
                 allowNull: false
+            },
+            created_at: {
+                type: Sequelize.DATE,
+                allowNull: false,
+                defaultValue: Sequelize.NOW
+            },
+            res_message: {
+                type: Sequelize.STRING,
+                allowNull: true
+            },
+            res_date: {
+                type: Sequelize.DATE,
+                allowNull: true
+            },
+            res_status: {
+                type: Sequelize.BOOLEAN,
+                allowNull: false,
+                defaultValue: false
             },
             userId: {
                 type: Sequelize.STRING, // User 모델의 기본 키와 동일한 타입으로 설정
@@ -41,8 +47,8 @@ const Address = class Address extends Sequelize.Model {
             sequelize,
             timestamps: false, // createdAt, udaptedAt 자동 생성
             underscored: false, // 카멜 케이스 및 스네이크 케이스 설정(false면 사용자 지정 이름 사용 가능)
-            modelName: 'Address', // 모델명
-            tableName: 'address', // 테이블명
+            modelName: 'Inquiry', // 모델명
+            tableName: 'inquiry', // 테이블명
             paranoid: false, // deletedAt 자동 생성
             charset: 'utf8', // 한글 입력 설정
             collate: 'utf8_general_ci',
@@ -52,11 +58,11 @@ const Address = class Address extends Sequelize.Model {
 
    static associate(db) {
         db.Address.belongsTo(db.User, {
-            foreignKey: 'userId', // Address 테이블의 외래 키
+            foreignKey: 'userId', // inquiry 테이블의 외래 키
             targetKey: 'userId',  // User 테이블의 기본 키
-            as: 'UserAddress',           // 관계를 참조할 때 사용할 별칭
+            as: 'UserInquiry',           // 관계를 참조할 때 사용할 별칭
         });
    }
 };
 
-module.exports = Address;
+module.exports = Inquiry;
