@@ -9,7 +9,8 @@ const Address = class Address extends Sequelize.Model {
                 type: Sequelize.INTEGER,
                 allowNull: false,
                 unique: true,
-                primaryKey: true
+                primaryKey: true,
+                autoIncrement: true
             },
             region: {
                 type: Sequelize.STRING,
@@ -25,7 +26,7 @@ const Address = class Address extends Sequelize.Model {
             },
             detail_address: {
                 type: Sequelize.STRING,
-                allowNull: false
+                allowNull: true
             },
             zonecode: {
                 type: Sequelize.INTEGER,
@@ -41,7 +42,7 @@ const Address = class Address extends Sequelize.Model {
             timestamps: false, // createdAt, udaptedAt 자동 생성
             underscored: false, // 카멜 케이스 및 스네이크 케이스 설정(false면 사용자 지정 이름 사용 가능)
             modelName: 'Address', // 모델명
-            tableName: 'Address', // 테이블명
+            tableName: 'address', // 테이블명
             paranoid: false, // deletedAt 자동 생성
             charset: 'utf8', // 한글 입력 설정
             collate: 'utf8_general_ci',
