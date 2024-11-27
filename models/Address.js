@@ -30,7 +30,11 @@ const Address = class Address extends Sequelize.Model {
             zonecode: {
                 type: Sequelize.INTEGER,
                 allowNull: false
-            }
+            },
+            userId: {
+                type: Sequelize.STRING, // User 모델의 기본 키와 동일한 타입으로 설정
+                allowNull: false,
+             }
          },
          {
             sequelize,
