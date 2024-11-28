@@ -2,7 +2,7 @@ const User = require('../models/User'); //user 테이블 객체 불러오기
 const Address = require('../models/Address'); // address 테이블 객체 불러오기
 const jwt = require('jsonwebtoken'); //토큰 모듈
 const { sequelize } = require('../models');
-const { where } = require('sequelize');
+// const { where } = require('sequelize');
 
 const ACCESS_KEY = `access_secret_key`;
 
@@ -19,7 +19,7 @@ const login = async (req, res) => {
 
         if(!user) { // 로그인 실패
             return res.status(401).json({ //Unauthorized
-                "message": "The ID or password does not match."
+                message: "The ID or password does not match."
             })
         } else { // 로그인 성공
             try{
@@ -37,23 +37,23 @@ const login = async (req, res) => {
                 res.set('Authorization', 'Bearer ' + accessToken);
 
                 res.status(200).json({
-                    "message": "login success",
-                    "token": accessToken,
-                    "userName": user.userName
+                    message: "login success",
+                    token: accessToken,
+                    name: user.userName
                 })
             } catch(error) {
                 console.log(`error: ${error}`);
                 res.status(500).json({
-                    "error": error,
-                    "message": "Internal Server Error"
+                    error: error,
+                    message: "Internal Server Error"
                 })
             }
         }
     } catch(err) {
         console.log(`error: ${err}`);
         res.status(500).json({
-            "error": err,
-            "message": "Internal Server Error"
+            error: err,
+            message: "Internal Server Error"
         })
     }
 }
@@ -113,18 +113,18 @@ const user_delete = async (req, res) => {
 
         if(!user){
             res.status(404).json({
-                "message": "user not found"
+                message: "user not found"
             })
         } else {
             res.status(200).json({
-                "message": "user deleted successfully"
+                message: "user deleted successfully"
             })
         }
     } catch(err) {
         console.log(`error: ${err}`);
         res.status(500).json({
-            "error": err,
-            "message": "Internal Server Error"
+            error: err,
+            message: "Internal Server Error"
         })
     }
 }
@@ -167,16 +167,16 @@ const profile = async (req, res) => {
         full_address = full_address.trim();
 
         res.status(200).json({
-            "message": "profile read successfully",
-            "userId": user.userId,
-            "name": user.userName,
-            "address": full_address
+            message: "profile read successfully",
+            userId: user.userId,
+            name: user.userName,
+            address: full_address
         })
     } catch(err) {
         console.log(`error: ${err}`);
         res.status(500).json({
-            "error": err,
-            "message": "Internal Server Error"
+            error: err,
+            message: "Internal Server Error"
         })
     }
 }
@@ -231,7 +231,7 @@ const profile_update = async (req, res) => {
         full_address = full_address.trim();
 
         res.status(200).json({
-            "message": "user information call successful",
+            message: "user information call successful",
             userId: user.userId,
             password: user.password,
             name: user.userName,
@@ -243,26 +243,27 @@ const profile_update = async (req, res) => {
     } catch(err) {
         console.log(`error: ${err}`);
         res.status(500).json({
-            "error": err,
-            "message": "Internal Server Error"
+            error: err,
+            message: "Internal Server Error"
         })
     }
 }
 
 const profile_update_process = async (req, res) => {
-    const userId = req.userId;
-    const { password, name, email, region, sub_region, street, detail_address, zonecode } = req.body;
+    const org_userId = req.userId;
+    const { userId, password, name, email, region, sub_region, street, detail_address, zonecode } = req.body;
 
     try {
         const t = await sequelize.transaction();
 
         await User.update({
+            userId: userId,
             password: password, 
             userName: name,
             userEmail: email
         }, {
             where: {
-                userId: userId
+                userId: org_userId
             }
         }, {
             transaction: t
@@ -310,7 +311,7 @@ const profile_update_process = async (req, res) => {
         full_address = full_address.trim();
 
         res.status(200).json({
-            "message": "user information updated successfully",
+            message: "user information updated successfully",
             userId: user.userId,
             password: user.password,
             name: user.userName,
@@ -320,8 +321,8 @@ const profile_update_process = async (req, res) => {
     } catch(err) {
         console.log(`error: ${err}`);
         res.status(500).json({
-            "error": err,
-            "message": "Internal Server Error"
+            error: err,
+            message: "Internal Server Error"
         })
     }
 }
@@ -346,13 +347,13 @@ const checkDuplicateId = async (req, res) => {
 
         res.status(200).json({
             is_available,
-            "message": message
+            message: message
         })
     } catch(err) {
         console.log(`error: ${err}`);
         res.status(500).json({
-            "error": err,
-            "message": "Internal Server Error"
+            error: err,
+            message: "Internal Server Error"
         })
     }
 }
