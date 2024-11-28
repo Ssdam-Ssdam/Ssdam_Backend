@@ -7,7 +7,7 @@ const PORT = 3000;
 
 //* DB connection & sync
 sequelize
-    .sync({ force: false })
+    .sync({ force: false }) //true면 서버 재시작 시 테이블 삭제 후 재생성
     .then(() => {
     	console.log('db connection success...!');
     })
