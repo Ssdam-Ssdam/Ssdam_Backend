@@ -56,10 +56,22 @@ const User = class User extends Sequelize.Model {
          as: 'Address',      // 관계를 참조할 때 사용할 별칭
        });
 
-       db.User.hasMany(db.Inquiry, {
+      db.User.hasMany(db.Inquiry, {
          foreignKey: 'userId', // Address 테이블의 외래 키
          sourceKey: 'userId',  // User 테이블의 기본 키
          as: 'Inquiry',      // 관계를 참조할 때 사용할 별칭
+       });
+
+       db.User.hasMany(db.Classified_images, {
+         foreignKey: 'userId', 
+         sourceKey: 'userId', 
+         as: 'Classified_images',    
+       });
+
+       db.User.hasMany(db.Feedback, {
+         foreignKey: 'userId', 
+         sourceKey: 'userId', 
+         as: 'Feedback', 
        });
    }
 };
