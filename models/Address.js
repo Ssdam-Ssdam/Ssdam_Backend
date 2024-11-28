@@ -35,8 +35,14 @@ const Address = class Address extends Sequelize.Model {
             userId: {
                 type: Sequelize.STRING, // User 모델의 기본 키와 동일한 타입으로 설정
                 allowNull: false,
-             }
-         },
+                references: {
+                    model: 'User',  // User 테이블을 참조
+                    key: 'userId',  // User 테이블의 userId를 참조
+                },
+                onUpdate: 'CASCADE', // User 변경 시 Address도 변경
+                onDelete: 'CASCADE', // User 삭제 시 Address도 삭제
+            }
+        },
          {
             sequelize,
             timestamps: false, // createdAt, udaptedAt 자동 생성

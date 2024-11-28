@@ -50,10 +50,16 @@ const User = class User extends Sequelize.Model {
        * 따로 외래키를 지정하지않으면, 모델명+기본키 컬럼이 생성되서 자동으로 연결된다.
        * 즉, User와 id가 합쳐져서 Userid라는 필드가 생겨서 자동연결해준다.*/
 
-      db.User.hasMany(db.Address, {
+      db.User.hasOne(db.Address, {
          foreignKey: 'userId', // Address 테이블의 외래 키
          sourceKey: 'userId',  // User 테이블의 기본 키
          as: 'Address',      // 관계를 참조할 때 사용할 별칭
+       });
+
+       db.User.hasMany(db.Inquiry, {
+         foreignKey: 'userId', // Address 테이블의 외래 키
+         sourceKey: 'userId',  // User 테이블의 기본 키
+         as: 'Inquiry',      // 관계를 참조할 때 사용할 별칭
        });
    }
 };
