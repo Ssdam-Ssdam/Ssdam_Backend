@@ -15,12 +15,12 @@ const view = async (req, res) => {
 
 // 사용자 생성
 const create = async (req, res) => {
-    const { userId, password, userName, userEmail, is_admin, region, sub_region, street, detail_address, zonecode } = req.body;
+    const { userId, password, name, email, region, sub_region, street, detail_address, zonecode    } = req.body;
 
     const t = await sequelize.transaction(); // 트랜잭션 시작
 
     // 필수 입력 값 검증
-    if (!userId || !password || !userName || !userEmail || !region || !sub_region || !zonecode) {    // 필수 입력값은 region,sub_region,zonecode 까지만
+    if (!userId || !password || !name || !email || !region || !sub_region || !zonecode) {    // 필수 입력값은 region,sub_region,zonecode 까지만
         return res.status(400).json({ message: '필수 입력 값이 누락되었습니다.' });
     }
 
@@ -35,9 +35,8 @@ const create = async (req, res) => {
             {
                 userId,
                 password,
-                userName,
-                userEmail,
-                is_admin
+                userName: name,
+                userEmail: email
             },
             { transaction: t } // 트랜잭션 사용
         );
@@ -64,7 +63,7 @@ const create = async (req, res) => {
 };
 
 const update = async (req, res) => {
-    const { userId, password, userName, userEmail, is_admin, region, sub_region, street, detail_address, zonecode } = req.body;
+    const { userId, password, name, email, region, sub_region, street, detail_address, zonecode } = req.body;
 
     if (!userId) {
         return res.status(400).json({ message: 'userId는 필수 입력 값입니다.' });
@@ -80,7 +79,11 @@ const update = async (req, res) => {
         }
 
         // 사용자 정보 수정
-        await user.update({ password, userName, userEmail, is_admin }, { transaction: t });
+        await user.update({
+            password,
+            userName: name,
+            userEmail: email
+        }, { transaction: t });
 
         // 주소 정보 수정
         const address = await Address.findOne({ where: { userId } });
