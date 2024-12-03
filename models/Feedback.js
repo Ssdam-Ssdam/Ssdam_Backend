@@ -16,6 +16,10 @@ const Feedback = class Feedback extends Sequelize.Model {
                 type: Sequelize.BOOLEAN,
                 allowNull: false
             },
+            waste_name: {
+                type: Sequelize.STRING,
+                allowNull: true
+            },
             userId: {
                 type: Sequelize.STRING, // User 모델의 기본 키와 동일한 타입으로 설정
                 allowNull: false,
