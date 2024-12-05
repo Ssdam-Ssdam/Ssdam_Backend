@@ -5,7 +5,7 @@ const Feedback = class Feedback extends Sequelize.Model {
    static init(sequelize) {
       return super.init(
          {
-            FeedbackId: {
+            feedbackId: {
                 type: Sequelize.INTEGER,
                 allowNull: false,
                 unique: true,
