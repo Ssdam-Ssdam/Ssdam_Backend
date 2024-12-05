@@ -26,7 +26,7 @@ const Classified_images = class Classified_images extends Sequelize.Model {
                 allowNull: true
             },
             accuracy: {
-                type: Sequelize.INTEGER,
+                type: Sequelize.DECIMAL(30, 18),
                 allowNull: true
             },
             userId: {
