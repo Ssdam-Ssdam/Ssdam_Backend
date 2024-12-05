@@ -17,4 +17,6 @@ router.post('/inquiry/createAnswer', authenticateAccessToken, authenticateAdmin,
 
 router.put('/inquiry/updateAnswer', authenticateAccessToken, authenticateAdmin, inquiry.updateAnswer);
 
+router.delete('/inquiry/delete', authenticateAccessToken, authenticateAdmin, inquiry.delete);
+
 module.exports = router;

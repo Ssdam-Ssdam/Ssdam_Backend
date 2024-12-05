@@ -132,6 +132,42 @@ const inquiryAdmin = {
                 error: error.message
             });
         }
+    },
+
+    // 관리자용 문의사항 삭제
+    delete: async (req, res) => {
+        const { inquiryId } = req.body;
+
+        if (!inquiryId) {
+            return res.status(400).json({ 
+                message: "inquiryId는 필수 입력 값입니다." 
+            });
+        }
+
+        try {
+            // 해당 문의사항이 존재하는지 확인
+            const inquiry = await Inquiry.findOne({
+                where: { inquiryId }
+            });
+            if (!inquiry) {
+                return res.status(404).json({
+                    message: "해당 문의사항을 찾을 수 없습니다."
+                });
+            }
+            // 문의사항 삭제
+            await inquiry.destroy();
+
+            res.status(200).json({
+                message: "문의사항이 성공적으로 삭제되었습니다.",
+                data: { inquiryId }
+            });
+        } catch (error) {
+            console.error('문의사항 삭제 에러:', error);
+            res.status(500).json({
+                message: "문의사항 삭제 중 오류가 발생했습니다.",
+                error: error.message
+            });
+        }
     }
 };
 
