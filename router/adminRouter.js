@@ -13,4 +13,8 @@ router.get('/feedback/view', authenticateAccessToken, authenticateAdmin, feedbac
 
 router.get('/inquiry/view', authenticateAccessToken, authenticateAdmin, inquiry.view);
 
+router.post('/inquiry/createAnswer', authenticateAccessToken, authenticateAdmin, inquiry.createAnswer);
+
+router.put('/inquiry/updateAnswer', authenticateAccessToken, authenticateAdmin, inquiry.updateAnswer);
+
 module.exports = router;
