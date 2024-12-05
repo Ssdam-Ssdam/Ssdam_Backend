@@ -36,6 +36,103 @@ const inquiryAdmin = {
             });
         }
     },
+
+    // 관리자용 문의사항 답변 생성
+    createAnswer: async (req, res) => {
+        const { inquiryId, res_message } = req.body;
+
+        try {
+            // 해당 문의사항이 존재하는지 확인
+            const inquiry = await Inquiry.findOne({
+                where: { inquiryId }
+            });
+
+            if (!inquiry) {
+                return res.status(404).json({
+                    message: "해당 문의사항을 찾을 수 없습니다."
+                });
+            }
+
+            if (inquiry.res_status === true) {
+                return res.status(400).json({
+                    message: "이미 답변이 등록된 문의사항입니다."
+                });
+            }
+
+            // 답변 생성
+            inquiry.res_message = res_message;
+            inquiry.res_date = new Date(); 
+            inquiry.res_status = true; 
+
+            await inquiry.save();
+
+            res.status(200).json({
+                message: "문의사항 답변이 성공적으로 등록되었습니다.",
+                data: {
+                    inquiryId: inquiry.inquiryId,
+                    title: inquiry.title,
+                    content: inquiry.content,
+                    res_message: inquiry.res_message,
+                    res_date: inquiry.res_date,
+                    res_status: inquiry.res_status
+                }
+            });
+        } catch (error) {
+            console.error('문의사항 답변 생성 에러:', error);
+            res.status(500).json({
+                message: "문의사항 답변 생성 중 오류가 발생했습니다.",
+                error: error.message
+            });
+        }
+    },
+
+    // 관리자용 문의사항 답변 수정
+    updateAnswer: async (req, res) => {
+        const { inquiryId, res_message } = req.body;
+
+        try {
+            const inquiry = await Inquiry.findOne({
+                where: { inquiryId }
+            });
+
+            if (!inquiry) {
+                return res.status(404).json({
+                    message: "해당 문의사항을 찾을 수 없습니다."
+                });
+            }
+
+            // 답변 상태 확인
+            if (inquiry.res_status !== true) {
+                return res.status(400).json({
+                    message: "아직 답변이 작성되지 않은 문의사항입니다. 먼저 답변을 작성하세요."
+                });
+            }
+
+            // 답변 수정
+            inquiry.res_message = res_message;
+            inquiry.res_date = new Date();
+
+            await inquiry.save();
+
+            res.status(200).json({
+                message: "문의사항 답변이 성공적으로 수정되었습니다.",
+                data: {
+                    inquiryId: inquiry.inquiryId,
+                    title: inquiry.title,
+                    content: inquiry.content,
+                    res_message: inquiry.res_message,
+                    res_date: inquiry.res_date,
+                    res_status: inquiry.res_status
+                }
+            });
+        } catch (error) {
+            console.error('문의사항 답변 수정 에러:', error);
+            res.status(500).json({
+                message: "문의사항 답변 수정 중 오류가 발생했습니다.",
+                error: error.message
+            });
+        }
+    }
 };
 
 module.exports = inquiryAdmin;
