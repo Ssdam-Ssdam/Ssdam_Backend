@@ -26,12 +26,14 @@ var userRouter = require('./router/userRouter');
 var inquiryRouter = require('./router/inquiryRouter');
 var larWasteRouter = require('./router/larWasteRouter');
 var personRouter = require('./router/personRouter');
+var adminRouter = require('./router/adminRouter');
 
 // routing
 app.use('/user', userRouter);
 app.use('/inquiry', inquiryRouter);
 app.use('/lar-waste', larWasteRouter);
 app.use('/person', personRouter);
+app.use('/admin', adminRouter);
 
 app.listen(PORT,()=>{ //실행 시 npm run dev 입력하면 파일 수정 시 서버 자동 재시작
     console.log(`Server is listening on ${PORT}`);
