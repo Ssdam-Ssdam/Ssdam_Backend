@@ -4,6 +4,10 @@ from torchvision import transforms
 from PIL import Image
 import timm
 import torch.nn.functional as F  # 엔트로피 계산을 위한 함수 임포트
+import json
+import sys
+
+# uvicorn main:app --reload
 
 # 모델 클래스 정의 및 불러오기
 def load_model(model_path="best_trained_model_v6.pth"):
@@ -15,7 +19,7 @@ def load_model(model_path="best_trained_model_v6.pth"):
         nn.Dropout(0.5), 
         nn.Linear(512, 18)  # 클래스 개수 (학습 시 설정한 클래스 개수와 동일)
     )
-    model.load_state_dict(torch.load(model_path, map_location=torch.device('cpu')))
+    model.load_state_dict(torch.load(model_path, map_location=torch.device('cpu'), weights_only=True))
     model.eval()  # 평가 모드로 설정
     return model
 
@@ -36,7 +40,7 @@ def calculate_entropy(probabilities):
     return entropy.item()  # 단일 값 반환
 
 # 예측 함수 (엔트로피와 클래스 출력)
-def predict(image_path, model_path="best_trained_model_v2.pth"):
+def predict(image_path, model_path="best_trained_model_v6.pth"):
     # 모델 로드
     model = load_model(model_path)
     
@@ -62,7 +66,9 @@ class_names = [
 if __name__ == "__main__":
     try:
         # 사용자로부터 입력 받기
-        image_path = "./input_desk.jpg"  # 첫 번째 인자: 이미지 경로
+        # 사용자 입력 값 읽기
+        userInput = sys.argv[1]
+        image_path = userInput  # 첫 번째 인자: 이미지 경로
         model_path = "./best_trained_model_v6.pth"  # 두 번째 인자: 모델 경로
         
         # 예측 수행
@@ -71,7 +77,12 @@ if __name__ == "__main__":
         # 예측된 품목명
         predicted_class_name = class_names[pred_class]
         
-        # 결과 출력
-        print(f"Predicted Class: {predicted_class_name}, Entropy: {entropy:.2f}")  # 품목명, 엔트로피 출력
+        # 결과 JSON 형식으로 출력
+        result = {
+            'predicted_class': predicted_class_name,
+            'entropy': entropy
+        }
+
+        print(json.dumps(result))  # JSON 형식으로 출력
     except Exception as e:
         print(f"Error: {str(e)}")
