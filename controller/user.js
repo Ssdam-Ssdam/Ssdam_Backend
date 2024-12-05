@@ -1,8 +1,10 @@
 const User = require('../models/User'); //user 테이블 객체 불러오기
 const Address = require('../models/Address'); // address 테이블 객체 불러오기
+const Classified_images = require('../models/Classified_images');
+const Feedback = require('../models\/Feedback');
+const Waste_fees = require('../models/Waste_fees');
 const jwt = require('jsonwebtoken'); //토큰 모듈
-const { sequelize } = require('../models');
-// const { where } = require('sequelize');
+const {sequelize} = require('../models');
 
 const ACCESS_KEY = `access_secret_key`;
 
@@ -327,6 +329,82 @@ const profile_update_process = async (req, res) => {
     }
 }
 
+const history = async (req, res) => {
+    const userId = req.userId;
+
+    try {
+        const t = await sequelize.transaction();
+
+        const all_images = await Classified_images.findAll({
+            where: {
+                userId: userId
+            }
+        }, {
+            transaction: t
+        });
+
+        const address = await Address.findOne({
+            where: {
+                userId: userId
+            }
+        }, {
+            transaction: t
+        })
+
+        await t.commit();
+
+        // 객체 변환
+        const all_images_plain = all_images.map(image => image.get({ plain: true }));
+
+        for (let i of all_images_plain) {
+            let feedback = await Feedback.findOne({
+                where: {
+                    imgId: i.imgId
+                }
+
+            })
+
+            if(feedback && !feedback.is_good){
+                i.waste_name = feedback.waste_name;
+            }
+       }
+
+       for (let i = 0 ; i < all_images.length ; i++){
+            const wastes = await Waste_fees.findAll({
+                where: {
+                    waste_name: all_images_plain[i].waste_name,
+                    region: address.region,
+                    sub_region: address.sub_region
+                }
+            })
+            console.log(`wastes: ${wastes[0].fee}`);
+
+            // waste_fee를 배열로 저장
+            all_images_plain[i].waste_fee = [];
+
+            for(let j of wastes){
+                all_images_plain[i].waste_fee.push({
+                    waste_standard: j.waste_standard,
+                    fee: j.fee
+                });
+            }
+       }
+
+       const history_data = all_images_plain;
+        res.status(200).json({
+            message: "user history get successfully",
+            history_data
+        })
+
+    } catch(err) {
+        console.log(`error: ${err}`);
+        res.status(500).json({
+            error: err,
+            message: "Internal Server Error"
+        });
+    }
+}
+
 // 아이디 중복 확인
 const checkDuplicateId = async (req, res) => {
     const { userId } = req.body;
@@ -365,5 +443,6 @@ module.exports = {
     profile,
     profile_update,
     profile_update_process,
+    history,
     checkDuplicateId
 }

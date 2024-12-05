@@ -18,14 +18,19 @@ sequelize
 app.use(express.json()); // JSON 형식의 body 파싱
 app.use(bodyParser.urlencoded({ extended: false }));
 
+// 정적 파일 폴더 지정
+app.use(express.static('public'));
+
 // router
 var userRouter = require('./router/userRouter');
 var inquiryRouter = require('./router/inquiryRouter');
+var larWasteRouter = require('./router/larWasteRouter');
 var personRouter = require('./router/personRouter');
 
 // routing
 app.use('/user', userRouter);
 app.use('/inquiry', inquiryRouter);
+app.use('/lar-waste', larWasteRouter);
 app.use('/person', personRouter);
 
 app.listen(PORT,()=>{ //실행 시 npm run dev 입력하면 파일 수정 시 서버 자동 재시작
