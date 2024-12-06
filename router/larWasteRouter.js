@@ -21,7 +21,7 @@ const upload = multer({
 
 router.post('/feedback', authenticateAccessToken, feedback);
 router.get('/search', search);
-router.get('/nearby-stores', nearbyStores);
+router.get('/nearby-stores', authenticateAccessToken, nearbyStores);
 router.post('/upload', authenticateAccessToken, upload.single('uploadFile'), upload_img);
 
 module.exports = router;
