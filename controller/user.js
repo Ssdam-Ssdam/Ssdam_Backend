@@ -5,7 +5,7 @@ const Feedback = require('../models\/Feedback');
 const Waste_fees = require('../models/Waste_fees');
 const jwt = require('jsonwebtoken'); //토큰 모듈
 const {sequelize} = require('../models');
-const { Op } = require('sequelize');
+const { Op, Sequelize } = require('sequelize');
 
 const login = async (req, res) => {
     const { userId, password } = req.body;
@@ -406,13 +406,16 @@ const history = async (req, res) => {
        for (let i = 0 ; i < all_images.length ; i++){
             const wastes = await Waste_fees.findAll({
                 where: {
-                    waste_name: {
-                        [Op.like]: `%${all_images_plain[i].waste_name}%`, // '특정이름'이 포함된 결과 검색
-                      },
-                    // waste_name: all_images_plain[i].waste_name,
-                    region: address.region,
-                    sub_region: address.sub_region
-                }
+                    [Sequelize.Op.and]: [
+                      Sequelize.literal(
+                        `REGEXP_REPLACE(waste_name, '\\(.*?\\)', '') LIKE '%${all_images_plain[i].waste_name}%'`
+                      ),
+                      {
+                        region: address.region,
+                        sub_region: address.sub_region
+                      }
+                    ]
+                  }
             })
             console.log(`wastes: ${wastes[0].fee}`);
 
