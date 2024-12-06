@@ -40,7 +40,7 @@ def calculate_entropy(probabilities):
     return entropy.item()  # 단일 값 반환
 
 # 예측 함수 (엔트로피와 클래스 출력)
-def predict(image_path, model_path="best_trained_model_v6.pth"):
+def predict(image_path, model_path="best_trained_model_v2.pth"):
     # 모델 로드
     model = load_model(model_path)
     
@@ -69,7 +69,7 @@ if __name__ == "__main__":
         # 사용자 입력 값 읽기
         userInput = sys.argv[1]
         image_path = userInput  # 첫 번째 인자: 이미지 경로
-        model_path = "./best_trained_model_v6.pth"  # 두 번째 인자: 모델 경로
+        model_path = "../ai_data/best_trained_model_v6.pth"  # 두 번째 인자: 모델 경로
         
         # 예측 수행
         pred_class, entropy = predict(image_path, model_path)

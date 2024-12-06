@@ -65,6 +65,8 @@ const search = async (req, res) => {
 }
 
 const nearbyStores = async (req, res) => {
+    const userId = req.userId;
+
 
 }
 
@@ -73,62 +75,80 @@ const upload_img = async (req, res) => {
     let file = '/img/' + req.file.filename;
 
     // select1. fastapi
-    try {
-        const imagePath = path.join(__dirname, '../public/img', req.file.filename);
-        // const imagePath = path.resolve(__dirname, '../input_bed.jpg');  // 이미지 파일 경로
-        const image = fs.createReadStream(imagePath);  // 이미지 파일 스트림
+    // try {
+    //     const imagePath = path.join(__dirname, '../public/img', req.file.filename);
+    //     const image = fs.createReadStream(imagePath);  // 이미지 파일 스트림
     
-        const form = new FormData();
-        form.append('file', image);
+    //     const form = new FormData();
+    //     form.append('file', image);
     
-        const response = await axios.post('http://localhost:8000/predict', form, {
-            headers: {
-                ...form.getHeaders()
-            }
-        });
+    //     const response = await axios.post('http://localhost:8000/predict', form, { // 배포시 파이썬 서버 주소로 변경
+    //         headers: {
+    //             ...form.getHeaders()
+    //         }
+    //     });
     
-        const { predicted_class, entropy } = response.data;
+    //     const { predicted_class, entropy } = response.data;
         
+    //     const img = await Classified_images.create({
+    //         file_path: file,
+    //         waste_name: predicted_class,
+    //         accuracy: entropy,
+    //         userId: userId
+    //     })
+    
+    //     res.status(200).json({
+    //         message: "success",
+    //         img
+    //     });
+    // } catch(err) {
+    //     console.log(`error: ${err}`);
+    //     res.status(500).json({
+    //         error: err,
+    //         message: "Internal Server Error"
+    //     })
+    // }
+    
+    // select2. child-process 모듈
+    const image_pth = path.join(__dirname, '../public/img', req.file.filename);
+    const python_path = path.join(__dirname, '../ai_data/return_prediction_entropy_v6.py');
+
+    const result = spawn('python', [python_path, image_pth]);
+
+    result.stdout.on('data', async (data) => {
+        // 1. data를 문자열로 변환
+        let dataString = data.toString().replace(/\r\n/g, ''); // \r\n 제거
+
+        // 2. JSON.parse를 사용하여 JavaScript 객체로 변환
+        let dataObject = JSON.parse(dataString);
+
+        // 3. 역슬래시(\) 제거
+        if (typeof dataObject.predicted_class === 'string') {
+            dataObject.predicted_class = dataObject.predicted_class.replace(/\\/g, '');
+        }
+
+        console.log(`Processed data: ${JSON.stringify(dataObject)}`);
+        console.log(`pre: ${dataObject.predicted_class}`);
+        console.log(`entr: ${dataObject.entropy}`);
+
         const img = await Classified_images.create({
             file_path: file,
-            waste_name: predicted_class,
-            accuracy: entropy,
+            waste_name: dataObject.predicted_class,
+            accuracy: dataObject.entropy,
             userId: userId
         })
-    
+
+        // 4. 클라이언트로 응답
         res.status(200).json({
             message: "success",
             img
         });
-    } catch(err) {
-        console.log(`error: ${err}`);
-        res.status(500).json({
-            error: err,
-            message: "Internal Server Error"
-        })
-    }
-    
-    // select2. child-process 모듈
-    // const image_pth = './input_bed.jpg';
+    });
 
-    // const result = spawn('python', ['./return_prediction_entropy_v6.py', image_pth]);
+    result.stderr.on('data', (data) => {
+        console.error(`stderr: ${data}`);
+    });
 
-    // result.stdout.on('data', async (data) => {
-    //     let dataString = data.toString().replace(/\r\n/g, '');  // \r\n 제거
-    //     let jsonData = JSON.parse(dataString);  // JSON으로 파싱
-
-    //     console.log(`data: ${JSON.stringify(jsonData)}`);  // JSON 데이터 출력
-
-    //     res.status(200).json({
-    //         message: "success",
-    //         object: jsonData.predicted_class,
-    //         entropy: jsonData.entropy
-    //     });
-    // });
-
-    // result.stderr.on('data', (data) => {
-    //     console.error(`stderr: ${data}`);
-    // });
 }
 
 module.exports = {
