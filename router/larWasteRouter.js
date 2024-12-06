@@ -20,7 +20,7 @@ const upload = multer({
     });
 
 router.post('/feedback', authenticateAccessToken, feedback);
-router.get('/search', search);
+router.get('/search', authenticateAccessToken, search);
 router.get('/nearby-stores', authenticateAccessToken, nearbyStores);
 router.post('/upload', authenticateAccessToken, upload.single('uploadFile'), upload_img);
 
