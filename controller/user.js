@@ -6,8 +6,6 @@ const Waste_fees = require('../models/Waste_fees');
 const jwt = require('jsonwebtoken'); //토큰 모듈
 const {sequelize} = require('../models');
 
-const ACCESS_KEY = `access_secret_key`;
-
 const login = async (req, res) => {
     const { userId, password } = req.body;
 
@@ -29,7 +27,7 @@ const login = async (req, res) => {
                 // 토큰 발급
                 const accessToken = jwt.sign(
                     userInfo, // 첫 번째 인자는 객체 형식으로 전달해야 한다
-                    ACCESS_KEY, {
+                    process.env.ACCESS_KEY, {
                         expiresIn: '7d', // 토큰 유효 기간
                         issuer: 'ssdam' // 토큰 발급 주체
                     }

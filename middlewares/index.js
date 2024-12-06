@@ -1,7 +1,5 @@
 const jwt = require('jsonwebtoken');
 
-const ACCESS_KEY = `access_secret_key`; // 후에 .env 파일로 사용
-
 // 토큰 유효성 검사
 async function authenticateAccessToken(req, res, next) {
     const authHeader = req.headers['authorization'];
@@ -14,7 +12,7 @@ async function authenticateAccessToken(req, res, next) {
         });
     }
 
-    jwt.verify(token, ACCESS_KEY, (err, user) => {
+    jwt.verify(token, process.env.ACCESS_KEY, (err, user) => {
         if (err){
             console.log(`verify error: ${err}`);
             if (err.name === 'TokenExpiredError') {
