@@ -1,9 +1,11 @@
 const express = require("express");
 const { sequelize } = require('./models'); // sequelize 객체 가져오기
 const bodyParser = require('body-parser');
+const dotenv = require('dotenv');
 const app = express();
 
-const PORT = 3000;
+dotenv.config();
+const port = process.env.PORT;
 
 //* DB connection & sync
 sequelize
@@ -35,6 +37,6 @@ app.use('/lar-waste', larWasteRouter);
 app.use('/person', personRouter);
 app.use('/admin', adminRouter);
 
-app.listen(PORT,()=>{ //실행 시 npm run dev 입력하면 파일 수정 시 서버 자동 재시작
-    console.log(`Server is listening on ${PORT}`);
+app.listen(port,()=>{ //실행 시 npm run dev 입력하면 파일 수정 시 서버 자동 재시작
+    console.log(`Server is listening on ${port}`);
 });
