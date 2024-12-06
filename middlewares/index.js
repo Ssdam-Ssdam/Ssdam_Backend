@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken');
+const axios = require('axios');
 
 // 토큰 유효성 검사
 async function authenticateAccessToken(req, res, next) {
@@ -44,7 +45,48 @@ async function authenticateAdmin(req, res, next) {
     }
 }
 
+async function getCoordinates(address) {
+    if (!address) {
+        throw new Error('Address is required');
+    }   
+
+
+  try {
+    // VWorld API 호출
+    const response = await axios.get('https://api.vworld.kr/req/address', {
+      params: {
+        service: 'address',
+        request: 'GetCoord',
+        version: '2.0',
+        crs: 'EPSG:4326',
+        type: 'ROAD',
+        address: address,
+        format: 'json',
+        errorformat: 'json',
+        key: process.env.GEOCODER_KEY
+      }
+    });
+
+    const result = response.data;
+
+    // 결과 출력 (디버깅용)
+    console.log(JSON.stringify(result, null, 2));
+
+    // 결과가 유효한지 확인
+    if (result.response && result.response.result) {
+      const { x, y } = result.response.result.point;
+      return { x: x, y: y };
+    } else {
+      throw new Error('Address not found');
+    }
+  } catch (error) {
+    console.error(error);
+    throw new Error('Something went wrong');
+  }
+}
+
 module.exports = {
     authenticateAccessToken,
-    authenticateAdmin
+    authenticateAdmin,
+    getCoordinates
 }

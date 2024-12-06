@@ -1,6 +1,11 @@
 const Feedback = require('../models/Feedback');
 const Waste_fees = require('../models/Waste_fees');
 const Classified_images = require('../models/Classified_images');
+const Address = require('../models/Address');
+
+// middleware
+const { getCoordinates } = require('../middlewares');
+
 // child-process 사용 모듈
 const { spawn } = require('child_process');
 
@@ -67,7 +72,36 @@ const search = async (req, res) => {
 const nearbyStores = async (req, res) => {
     const userId = req.userId;
 
+    try {
+        const address = await Address.findOne({
+            where: {
+                userId: userId
+            }
+        })
 
+        if(!address){
+            res.status(400).json({
+                message: "A valid address value for the user does not exist."
+            })
+        } else {
+            const user_address = address.region + ' ' + address.sub_region + ' ' + address.street;
+            console.log(`user address: ${user_address}`);
+            const { x, y } = await getCoordinates(user_address);
+
+            // 사용자의 주소 좌표 변경 결과
+            console.log(`lat: ${x}, lon: ${y}`);
+            res.status(200).json({
+                user_lat: x,
+                user_lon: y
+            })
+        }
+    } catch(err) {
+        console.log(`error: ${err}`);
+        res.status(500).json({
+            error: err,
+            message: "Internal Server Error"
+        })
+    }
 }
 
 const upload_img = async (req, res) => {
