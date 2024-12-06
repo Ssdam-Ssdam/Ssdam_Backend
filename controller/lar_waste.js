@@ -129,82 +129,82 @@ const upload_img = async (req, res) => {
     let file = '/img/' + req.file.filename;
 
     // select1. fastapi
-    // try {
-    //     const imagePath = path.join(__dirname, '../public/img', req.file.filename);
-    //     const image = fs.createReadStream(imagePath);  // 이미지 파일 스트림
+    try {
+        const imagePath = path.join(__dirname, '../public/img', req.file.filename);
+        const image = fs.createReadStream(imagePath);  // 이미지 파일 스트림
     
-    //     const form = new FormData();
-    //     form.append('file', image);
+        const form = new FormData();
+        form.append('file', image);
     
-    //     const response = await axios.post('http://localhost:8000/predict', form, { // 배포시 파이썬 서버 주소로 변경
-    //         headers: {
-    //             ...form.getHeaders()
-    //         }
-    //     });
+        const response = await axios.post('http://localhost:8000/predict', form, { // 배포시 파이썬 서버 주소로 변경
+            headers: {
+                ...form.getHeaders()
+            }
+        });
     
-    //     const { predicted_class, entropy } = response.data;
+        const { predicted_class, entropy } = response.data;
         
-    //     const img = await Classified_images.create({
-    //         file_path: file,
-    //         waste_name: predicted_class,
-    //         accuracy: entropy,
-    //         userId: userId
-    //     })
-    
-    //     res.status(200).json({
-    //         message: "success",
-    //         img
-    //     });
-    // } catch(err) {
-    //     console.log(`error: ${err}`);
-    //     res.status(500).json({
-    //         error: err,
-    //         message: "Internal Server Error"
-    //     })
-    // }
-    
-    // select2. child-process 모듈
-    const image_pth = path.join(__dirname, '../public/img', req.file.filename);
-    const python_path = path.join(__dirname, '../ai_data/return_prediction_entropy_v6.py');
-
-    const result = spawn('python', [python_path, image_pth]);
-
-    result.stdout.on('data', async (data) => {
-        // 1. data를 문자열로 변환
-        let dataString = data.toString().replace(/\r\n/g, ''); // \r\n 제거
-
-        // 2. JSON.parse를 사용하여 JavaScript 객체로 변환
-        let dataObject = JSON.parse(dataString);
-
-        // 3. 역슬래시(\) 제거
-        if (typeof dataObject.predicted_class === 'string') {
-            dataObject.predicted_class = dataObject.predicted_class.replace(/\\/g, '');
-        }
-
-        console.log(`Processed data: ${JSON.stringify(dataObject)}`);
-        console.log(`pre: ${dataObject.predicted_class}`);
-        console.log(`entr: ${dataObject.entropy}`);
-
         const img = await Classified_images.create({
             file_path: file,
-            waste_name: dataObject.predicted_class,
-            accuracy: dataObject.entropy,
+            waste_name: predicted_class,
+            accuracy: entropy,
             userId: userId
         })
-
-        // 4. 클라이언트로 응답
+    
         res.status(200).json({
             message: "success",
-            imgId: img.imgId,
-            waste_name: img.waste_name,
-            accuracy: img.accuracy,
-            image: img.file_path
+            img
         });
-    });
+    } catch(err) {
+        console.log(`error: ${err}`);
+        res.status(500).json({
+            error: err,
+            message: "Internal Server Error"
+        })
+    }
+    
+    // select2. child-process 모듈
+    // const image_pth = path.join(__dirname, '../public/img', req.file.filename);
+    // const python_path = path.join(__dirname, '../ai_data/return_prediction_entropy_v6.py');
 
-    result.stderr.on('data', (data) => {
-        console.error(`stderr: ${data}`);
-    });
+    // const result = spawn('python', [python_path, image_pth]);
+
+    // result.stdout.on('data', async (data) => {
+    //     // 1. data를 문자열로 변환
+    //     let dataString = data.toString().replace(/\r\n/g, ''); // \r\n 제거
+
+    //     // 2. JSON.parse를 사용하여 JavaScript 객체로 변환
+    //     let dataObject = JSON.parse(dataString);
+
+    //     // 3. 역슬래시(\) 제거
+    //     if (typeof dataObject.predicted_class === 'string') {
+    //         dataObject.predicted_class = dataObject.predicted_class.replace(/\\/g, '');
+    //     }
+
+    //     console.log(`Processed data: ${JSON.stringify(dataObject)}`);
+    //     console.log(`pre: ${dataObject.predicted_class}`);
+    //     console.log(`entr: ${dataObject.entropy}`);
+
+    //     const img = await Classified_images.create({
+    //         file_path: file,
+    //         waste_name: dataObject.predicted_class,
+    //         accuracy: dataObject.entropy,
+    //         userId: userId
+    //     })
+
+    //     // 4. 클라이언트로 응답
+    //     res.status(200).json({
+    //         message: "success",
+    //         imgId: img.imgId,
+    //         waste_name: img.waste_name,
+    //         accuracy: img.accuracy,
+    //         image: img.file_path
+    //     });
+    // });
+
+    // result.stderr.on('data', (data) => {
+    //     console.error(`stderr: ${data}`);
+    // });
 
 }
 
