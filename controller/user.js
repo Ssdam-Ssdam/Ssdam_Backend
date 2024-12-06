@@ -337,8 +337,7 @@ const history = async (req, res) => {
         const all_images = await Classified_images.findAll({
             where: {
                 userId: userId
-            }
-        }, {
+            },
             transaction: t
         });
 

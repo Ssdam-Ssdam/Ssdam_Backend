@@ -2,6 +2,8 @@ const Feedback = require('../models/Feedback');
 const Waste_fees = require('../models/Waste_fees');
 const Classified_images = require('../models/Classified_images');
 const Address = require('../models/Address');
+const { Op } = require('sequelize');
+const {sequelize} = require('../models');
 
 // middleware
 const { getCoordinates } = require('../middlewares');
@@ -47,13 +49,31 @@ const feedback = async (req, res) => {
 
 const search = async (req, res) => {
     const { waste_name } = req.query;
+    const userId = req.userId;
 
     try {
+        const t = await sequelize.transaction();
+
+        const address = await Address.findOne({
+            where: {
+                userId: userId
+            }
+        }, {
+            transaction: t
+        })
+
         const wastes = await Waste_fees.findAll({
             where: {
-                waste_name: waste_name
-            }
+                waste_name: {
+                    [Op.like]: `%${waste_name}%`, // '특정이름'이 포함된 결과 검색
+                },
+                region: address.region,
+                sub_region: address.sub_region
+            }, 
+            transaction: t
         })
+
+        await t.commit();
 
         console.log(`waste search length: ${wastes.length}`);
         res.status(200).json({
@@ -175,7 +195,10 @@ const upload_img = async (req, res) => {
         // 4. 클라이언트로 응답
         res.status(200).json({
             message: "success",
-            img
+            imgId: img.imgId,
+            waste_name: img.waste_name,
+            accuracy: img.accuracy,
+            image: img.file_path
         });
     });
 
