@@ -2,7 +2,7 @@ const Feedback = require('../models/Feedback');
 const Waste_fees = require('../models/Waste_fees');
 const Classified_images = require('../models/Classified_images');
 const Address = require('../models/Address');
-const { Op } = require('sequelize');
+const { Op, Sequelize } = require('sequelize');
 const {sequelize} = require('../models');
 
 // middleware
@@ -64,11 +64,15 @@ const search = async (req, res) => {
 
         const wastes = await Waste_fees.findAll({
             where: {
-                waste_name: {
-                    [Op.like]: `%${waste_name}%`, // '특정이름'이 포함된 결과 검색
-                },
-                region: address.region,
-                sub_region: address.sub_region
+                [Sequelize.Op.and]: [
+                  Sequelize.literal(
+                    `REGEXP_REPLACE(waste_name, '\\(.*?\\)', '') LIKE '%${waste_name}%'`
+                  ),
+                  {
+                    region: address.region,
+                    sub_region: address.sub_region
+                  }
+                ]
             }, 
             transaction: t
         })
@@ -150,10 +154,40 @@ const upload_img = async (req, res) => {
             accuracy: entropy,
             userId: userId
         })
+
+        const address = await Address.findOne({
+            where: {
+                userId: userId
+            }
+        })
+        if(!address){
+            res.status(404).json({
+                message: "user address is not existed"
+            })
+        }
+
+        const waste_fees = await Waste_fees.findAll({
+            where: {
+              [Sequelize.Op.and]: [
+                Sequelize.literal(
+                  `REGEXP_REPLACE(waste_name, '\\(.*?\\)', '') LIKE '%${img.waste_name}%'`
+                ),
+                {
+                  region: address.region,
+                  sub_region: address.sub_region
+                }
+              ]
+            }
+          });
+        console.log(`waste_fees: ${waste_fees}`);
     
         res.status(200).json({
             message: "success",
-            img
+            imgId: img.imgId,
+            waste_name: img.waste_name,
+            accuracy: img.accuracy,
+            image: img.file_path,
+            waste_fees
         });
     } catch(err) {
         console.log(`error: ${err}`);
