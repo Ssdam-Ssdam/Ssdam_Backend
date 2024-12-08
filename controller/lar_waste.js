@@ -180,20 +180,6 @@ const upload_img = async (req, res) => {
               ]
             }
           });
-          
-        // const waste_fees = await Waste_fees.findAll({
-        //     where: {
-        //       [Sequelize.Op.and]: [
-        //         Sequelize.literal(
-        //           `REGEXP_REPLACE(waste_name, '\\(.*?\\)', '') LIKE '%${img.waste_name}%'`
-        //         ),
-        //         {
-        //           region: address.region,
-        //           sub_region: address.sub_region
-        //         }
-        //       ]
-        //     }
-        //   });
         console.log(`waste_fees: ${waste_fees}`);
     
         res.status(200).json({
