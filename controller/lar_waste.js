@@ -168,17 +168,32 @@ const upload_img = async (req, res) => {
 
         const waste_fees = await Waste_fees.findAll({
             where: {
+              region: address.region,
+              sub_region: address.sub_region,
               [Sequelize.Op.and]: [
-                Sequelize.literal(
-                  `REGEXP_REPLACE(waste_name, '\\(.*?\\)', '') LIKE '%${img.waste_name}%'`
-                ),
-                {
-                  region: address.region,
-                  sub_region: address.sub_region
-                }
+                Sequelize.where(
+                  Sequelize.fn('REGEXP_REPLACE', Sequelize.col('waste_name'), '\\(.*?\\)', ''),
+                  {
+                    [Sequelize.Op.like]: `%${img.waste_name}%`,
+                  }
+                )
               ]
             }
           });
+          
+        // const waste_fees = await Waste_fees.findAll({
+        //     where: {
+        //       [Sequelize.Op.and]: [
+        //         Sequelize.literal(
+        //           `REGEXP_REPLACE(waste_name, '\\(.*?\\)', '') LIKE '%${img.waste_name}%'`
+        //         ),
+        //         {
+        //           region: address.region,
+        //           sub_region: address.sub_region
+        //         }
+        //       ]
+        //     }
+        //   });
         console.log(`waste_fees: ${waste_fees}`);
     
         res.status(200).json({
