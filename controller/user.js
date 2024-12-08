@@ -404,19 +404,37 @@ const history = async (req, res) => {
        }
 
        for (let i = 0 ; i < all_images.length ; i++){
-            const wastes = await Waste_fees.findAll({
-                where: {
-                    [Sequelize.Op.and]: [
-                      Sequelize.literal(
-                        `REGEXP_REPLACE(waste_name, '\\(.*?\\)', '') LIKE '%${all_images_plain[i].waste_name}%'`
-                      ),
-                      {
-                        region: address.region,
-                        sub_region: address.sub_region
-                      }
-                    ]
-                  }
-            })
+        const wastes = await Waste_fees.findAll({
+            where: {
+              region: address.region,
+              sub_region: address.sub_region,
+              [Sequelize.Op.and]: [
+                Sequelize.where(
+                  Sequelize.fn(
+                    'REGEXP_REPLACE',
+                    Sequelize.col('waste_name'),
+                    '\\(.*?\\)',
+                    '' // 괄호와 그 안의 내용을 공백으로 대체
+                  ),
+                  all_images_plain[i].waste_name // 정확히 일치하는 이름만 검색
+                )
+              ]
+            }
+          });
+            // const wastes = await Waste_fees.findAll({
+            //     where: {
+            //         region: address.region,
+            //         sub_region: address.sub_region,
+            //         [Sequelize.Op.and]: [
+            //           Sequelize.where(
+            //             Sequelize.fn('REGEXP_REPLACE', Sequelize.col('waste_name'), '\\(.*?\\)', ''),
+            //             {
+            //               [Sequelize.Op.like]: `%${all_images_plain[i].waste_name}%`,
+            //             }
+            //           )
+            //         ]
+            //       }
+            // })
             console.log(`wastes: ${wastes[0].fee}`);
 
             // waste_fee를 배열로 저장

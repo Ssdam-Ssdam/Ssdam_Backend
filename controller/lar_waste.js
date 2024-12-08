@@ -64,16 +64,21 @@ const search = async (req, res) => {
 
         const wastes = await Waste_fees.findAll({
             where: {
+                region: address.region,
+                sub_region: address.sub_region,
                 [Sequelize.Op.and]: [
-                  Sequelize.literal(
-                    `REGEXP_REPLACE(waste_name, '\\(.*?\\)', '') LIKE '%${waste_name}%'`
-                  ),
-                  {
-                    region: address.region,
-                    sub_region: address.sub_region
-                  }
+                  Sequelize.where(
+                    Sequelize.fn(
+                      'REGEXP_REPLACE',
+                      Sequelize.col('waste_name'),
+                      '\\(.*?\\)',
+                      '' // 괄호와 그 안의 내용을 공백으로 대체
+                    ),
+                    waste_name // 정확히 일치하는 이름만 검색
+                  )
                 ]
-            }, 
+              }
+            , 
             transaction: t
         })
 
@@ -168,17 +173,21 @@ const upload_img = async (req, res) => {
 
         const waste_fees = await Waste_fees.findAll({
             where: {
-              region: address.region,
-              sub_region: address.sub_region,
-              [Sequelize.Op.and]: [
-                Sequelize.where(
-                  Sequelize.fn('REGEXP_REPLACE', Sequelize.col('waste_name'), '\\(.*?\\)', ''),
-                  {
-                    [Sequelize.Op.like]: `%${img.waste_name}%`,
-                  }
-                )
-              ]
-            }
+                region: address.region,
+                sub_region: address.sub_region,
+                [Sequelize.Op.and]: [
+                  Sequelize.where(
+                    Sequelize.fn(
+                      'REGEXP_REPLACE',
+                      Sequelize.col('waste_name'),
+                      '\\(.*?\\)',
+                      '' // 괄호와 그 안의 내용을 공백으로 대체
+                    ),
+                    img.waste_name // 정확히 일치하는 이름만 검색
+                  )
+                ]
+              }
+            
           });
         console.log(`waste_fees: ${waste_fees}`);
     
