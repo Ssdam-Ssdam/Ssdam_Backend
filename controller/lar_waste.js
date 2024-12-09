@@ -67,17 +67,32 @@ const search = async (req, res) => {
                 region: address.region,
                 sub_region: address.sub_region,
                 [Sequelize.Op.and]: [
-                  Sequelize.where(
-                    Sequelize.fn(
-                      'REGEXP_REPLACE',
-                      Sequelize.col('waste_name'),
-                      '\\(.*?\\)',
-                      '' // 괄호와 그 안의 내용을 공백으로 대체
-                    ),
-                    waste_name // 정확히 일치하는 이름만 검색
-                  )
+                    Sequelize.where(
+                        Sequelize.fn(
+                            'REGEXP_REPLACE',
+                            Sequelize.col('waste_name'),
+                            '\\(.*?\\)', // 괄호와 그 안의 내용을 제거
+                            '' 
+                        ),
+                        { [Sequelize.Op.like]: `%${waste_name}%` } // waste_name이 포함된 값 검색
+                    )
                 ]
-              }
+            }
+            // where: {
+            //     region: address.region,
+            //     sub_region: address.sub_region,
+            //     [Sequelize.Op.and]: [
+            //       Sequelize.where(
+            //         Sequelize.fn(
+            //           'REGEXP_REPLACE',
+            //           Sequelize.col('waste_name'),
+            //           '\\(.*?\\)',
+            //           '' // 괄호와 그 안의 내용을 공백으로 대체
+            //         ),
+            //         waste_name // 정확히 일치하는 이름만 검색
+            //       )
+            //     ]
+            //   }
             , 
             transaction: t
         })
