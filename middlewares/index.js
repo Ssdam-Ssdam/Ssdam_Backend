@@ -1,5 +1,8 @@
 const jwt = require('jsonwebtoken');
 const axios = require('axios');
+const fs = require('fs');
+const csvParser = require('csv-parser');
+const haversine = require('haversine');
 
 // 토큰 유효성 검사
 async function authenticateAccessToken(req, res, next) {
@@ -74,8 +77,10 @@ async function getCoordinates(address) {
 
     // 결과가 유효한지 확인
     if (result.response && result.response.result) {
-      const { x, y } = result.response.result.point;
-      return { x: x, y: y };
+        const { x, y } = result.response.result.point;
+        return { latitude: y, longitude: x };
+    //   const { x, y } = result.response.result.point;
+    //   return { x: x, y: y };
     } else {
       throw new Error('Address not found');
     }
@@ -85,8 +90,62 @@ async function getCoordinates(address) {
   }
 }
 
+// 가까운 거리 순 50개의 데이터 추출
+async function getClosestLocations(user_address, csvFilePath) {
+    console.log(`user_addres: ${user_address}`);
+    console.log(`csvFilePath: ${csvFilePath}`);
+
+    try {
+      // 1. Get user address coordinates
+      const userCoordinates = await getCoordinates(user_address);
+      console.log(`user_coordinates: ${userCoordinates.latitude}, ${userCoordinates.longitude}`);
+  
+      if (!userCoordinates) {
+        throw new Error('Unable to fetch coordinates for user address.');
+      }
+  
+      // 2. Read CSV file and parse rows
+      const csvData = [];
+      await new Promise((resolve, reject) => {
+        fs.createReadStream(csvFilePath)
+          .pipe(csvParser())
+          .on('data', (row) => {
+            if (row.latitude && row.longitude) {
+              csvData.push({
+                ...row,
+                latitude: parseFloat(row.latitude),
+                longitude: parseFloat(row.longitude),
+              });
+            }
+          })
+          .on('end', resolve)
+          .on('error', reject);
+      });
+  
+      // 3. Calculate distances
+      const distances = csvData.map((row) => {
+        const distance = haversine(
+          { latitude: userCoordinates.latitude, longitude: userCoordinates.longitude },
+          { latitude: row.latitude, longitude: row.longitude }
+        );
+        return { ...row, distance };
+      });
+  
+      // 4. Sort by distance and get closest 50
+      const closestLocations = distances
+        .sort((a, b) => a.distance - b.distance)
+        .slice(0, 50);
+  
+      return closestLocations;
+    } catch (error) {
+      console.error('Error fetching closest locations:', error);
+      throw error;
+    }
+  }
+
 module.exports = {
     authenticateAccessToken,
     authenticateAdmin,
-    getCoordinates
+    getCoordinates,
+    getClosestLocations
 }

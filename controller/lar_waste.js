@@ -6,7 +6,7 @@ const { Op, Sequelize } = require('sequelize');
 const {sequelize} = require('../models');
 
 // middleware
-const { getCoordinates } = require('../middlewares');
+const { getCoordinates, getClosestLocations } = require('../middlewares');
 
 // child-process 사용 모듈
 const { spawn } = require('child_process');
@@ -101,6 +101,19 @@ const search = async (req, res) => {
 const nearbyStores = async (req, res) => {
     const userId = req.userId;
 
+    const area_data = {
+        "경기도": {
+            "군포시": "./data/gyeonggido_gunposi.csv"
+        },
+        "인천광역시": {
+            "미추홀구": "./data/incheon_michuholgu.csv",
+            "남동구": "./data/incheon_namdonggu.csv"
+        },
+        "대구광역시": {
+            "서구": "./data/daegu_seogu.csv"
+        }
+      }
+
     try {
         const address = await Address.findOne({
             where: {
@@ -108,20 +121,29 @@ const nearbyStores = async (req, res) => {
             }
         })
 
-        if(!address){
+        const user_address = address.region + ' ' + address.sub_region + ' ' + address.street;
+        const targetKey = Object.keys(area_data[address.region]).find((key) =>
+            address.sub_region.includes(key)
+          );
+
+        // CSV 파일 경로 추출
+        const csvFilePath = targetKey ? area_data[address.region][targetKey] : null;
+
+        if(!csvFilePath){
             res.status(400).json({
-                message: "A valid address value for the user does not exist."
+                message: "A map of the area is still being prepared."
             })
         } else {
-            const user_address = address.region + ' ' + address.sub_region + ' ' + address.street;
-            console.log(`user address: ${user_address}`);
-            const { x, y } = await getCoordinates(user_address);
+            const { latitude, longitude } = await getCoordinates(user_address);
+
+            const locations = await getClosestLocations(user_address, csvFilePath);
 
             // 사용자의 주소 좌표 변경 결과
-            console.log(`lat: ${x}, lon: ${y}`);
+            console.log(`lat: ${latitude}, lon: ${longitude}`);
             res.status(200).json({
-                user_lat: x,
-                user_lon: y
+                user_lat: latitude,
+                user_lon: longitude,
+                locations
             })
         }
     } catch(err) {
