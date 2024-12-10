@@ -1,6 +1,6 @@
 const Sequelize = require('sequelize');
-const env = process.env.NODE_ENV || 'development';
-const config = require('../config/config')[env];
+const env = process.env.NODE_ENV || 'production';
+const config = require('../config/config.js')[env];
 
 // 모델 정의 모듈 불러오기
 const User = require('./User');
