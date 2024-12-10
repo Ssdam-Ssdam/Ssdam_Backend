@@ -14,7 +14,7 @@ def run_python_script(image_path: str):
     try:
         # 파이썬 스크립트를 실행하고 결과를 가져옴
         result = subprocess.run(
-            ['python', './return_prediction_entropy_v6.py', image_path],  # 파이썬 파일 경로
+            ['python', './return_prediction_entropy.py', image_path],  # 파이썬 파일 경로
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True
