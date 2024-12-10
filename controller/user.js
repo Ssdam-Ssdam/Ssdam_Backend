@@ -407,7 +407,7 @@ const history = async (req, res) => {
         const wastes = await Waste_fees.findAll({
             where: {
               region: address.region,
-              sub_region: address.sub_region,
+              sub_region: address.sub_region.split(' ')[0],
               [Sequelize.Op.and]: [
                 Sequelize.where(
                   Sequelize.fn(
