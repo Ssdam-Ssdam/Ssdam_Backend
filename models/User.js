@@ -36,7 +36,7 @@ const User = class User extends Sequelize.Model {
             sequelize,
             timestamps: false, // createdAt, udaptedAt 자동 생성
             underscored: false, // 카멜 케이스 및 스네이크 케이스 설정(false면 사용자 지정 이름 사용 가능)
-            modelName: 'User', // 모델명
+            modelName: 'user', // 모델명
             tableName: 'user', // 테이블명
             paranoid: false, // deletedAt 자동 생성
             charset: 'utf8', // 한글 입력 설정

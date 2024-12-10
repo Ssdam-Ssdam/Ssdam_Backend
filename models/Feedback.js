@@ -24,7 +24,7 @@ const Feedback = class Feedback extends Sequelize.Model {
                 type: Sequelize.STRING, // User 모델의 기본 키와 동일한 타입으로 설정
                 allowNull: false,
                 references: {
-                    model: 'User',  // User 테이블을 참조
+                    model: 'user',  // User 테이블을 참조
                     key: 'userId',  // User 테이블의 userId를 참조
                 },
                 onUpdate: 'CASCADE', // User 변경 시 Address도 변경
@@ -34,7 +34,7 @@ const Feedback = class Feedback extends Sequelize.Model {
                 type: Sequelize.INTEGER, 
                 allowNull: false,
                 references: {
-                    model: 'Classified_images', 
+                    model: 'classified_images', 
                     key: 'imgId',  
                 },
                 onUpdate: 'CASCADE', 
