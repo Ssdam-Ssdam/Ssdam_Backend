@@ -2,6 +2,7 @@ const express = require("express");
 const { sequelize } = require('./models'); // sequelize 객체 가져오기
 const bodyParser = require('body-parser');
 const dotenv = require('dotenv');
+const path = require('path');
 const app = express();
 
 dotenv.config();
@@ -22,6 +23,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 
 // 정적 파일 폴더 지정
 app.use(express.static('public'));
+app.use('/img', express.static(path.join(__dirname, 'img')));
 
 // router
 var userRouter = require('./router/userRouter');
