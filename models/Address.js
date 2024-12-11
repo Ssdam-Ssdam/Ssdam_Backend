@@ -12,6 +12,10 @@ const Address = class Address extends Sequelize.Model {
                 primaryKey: true,
                 autoIncrement: true
             },
+            full_address: {
+                type: Sequelize.STRING,
+                allowNull: false
+            },
             region: {
                 type: Sequelize.STRING,
                 allowNull: false

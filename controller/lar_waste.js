@@ -101,14 +101,14 @@ const nearbyStores = async (req, res) => {
     const userId = req.userId;
 
     const area_data = {
-        "경기도": {
+        "경기": {
             "군포시": "./data/gyeonggido_gunposi.csv"
         },
-        "인천광역시": {
+        "인천": {
             "미추홀구": "./data/incheon_michuholgu.csv",
             "남동구": "./data/incheon_namdonggu.csv"
         },
-        "대구광역시": {
+        "대구": {
             "서구": "./data/daegu_seogu.csv"
         }
       }

@@ -60,7 +60,10 @@ const login = async (req, res) => {
 }
 
 const register = async (req, res) => {
-    const { userId, password, name, email, region, sub_region, street, detail_address, zonecode } = req.body;
+    const { userId, password, name, email, full_address, region, sub_region, street, detail_address, zonecode } = req.body;
+
+    console.log(`region: ${region}`);
+    console.log(`sub_region: ${sub_region}`);
 
     const t = await sequelize.transaction(); // 트랜잭션 시작
     try {
@@ -79,6 +82,7 @@ const register = async (req, res) => {
         await Address.create(
             {
                 userId: user.userId, // User의 userId와 연결
+                full_address: full_address,
                 region: region,
                 sub_region: sub_region,
                 street: street,
@@ -154,30 +158,7 @@ const profile = async (req, res) => {
 
         await t.commit();
 
-        var sim_address = '';
-        var full_address = '';
-
-        if (address.region) {
-            sim_address += address.region + ' ';
-            full_address += address.region + ' ';
-        }
-    
-        if (address.sub_region) {
-            sim_address += address.sub_region + ' ';
-            full_address += address.sub_region + ' ';
-        }
-    
-        if (address.street) {
-            full_address += address.street + ' ';
-        }
-    
-        if (address.detail_address) {
-            full_address += address.detail_address;
-        }
-    
-        // 공백을 마지막에 하나만 남기도록 처리
-        sim_address = sim_address.trim();
-        full_address = full_address.trim();
+        var sim_address = address.region + ' ' + address.sub_region;
 
         res.status(200).json({
             message: "user information call successful",
@@ -186,29 +167,9 @@ const profile = async (req, res) => {
             name: user.userName,
             email: user.userEmail,
             sim_address: sim_address,
-            address: full_address
+            address: address.full_address
 
         })
-
-        // var full_address = '';
-
-        // if (address.region) {
-        //     full_address += address.region + ' ';
-        // }
-
-        // if (address.sub_region) {
-        //     full_address += address.sub_region + ' ';
-        // }
-
-        // // 공백을 마지막에 하나만 남기도록 처리
-        // full_address = full_address.trim();
-
-        // res.status(200).json({
-        //     message: "profile read successfully",
-        //     userId: user.userId,
-        //     name: user.userName,
-        //     sim_address: full_address
-        // })
     } catch(err) {
         console.log(`error: ${err}`);
         res.status(500).json({
@@ -242,30 +203,7 @@ const profile_update = async (req, res) => {
 
         await t.commit();
 
-        var sim_address = '';
-        var full_address = '';
-
-        if (address.region) {
-            sim_address += address.region + ' ';
-            full_address += address.region + ' ';
-        }
-    
-        if (address.sub_region) {
-            sim_address += address.sub_region + ' ';
-            full_address += address.sub_region + ' ';
-        }
-    
-        if (address.street) {
-            full_address += address.street + ' ';
-        }
-    
-        if (address.detail_address) {
-            full_address += address.detail_address;
-        }
-    
-        // 공백을 마지막에 하나만 남기도록 처리
-        sim_address = sim_address.trim();
-        full_address = full_address.trim();
+        var sim_address = address.region + ' ' + address.sub_region;
 
         res.status(200).json({
             message: "user information call successful",
@@ -274,7 +212,7 @@ const profile_update = async (req, res) => {
             name: user.userName,
             email: user.userEmail,
             sim_address: sim_address,
-            address: full_address
+            address: address.full_address
 
         })
     } catch(err) {
@@ -288,13 +226,12 @@ const profile_update = async (req, res) => {
 
 const profile_update_process = async (req, res) => {
     const org_userId = req.userId;
-    const { userId, password, name, email, region, sub_region, street, detail_address, zonecode } = req.body;
+    const { password, name, email, region, sub_region, street, detail_address, zonecode, full_address } = req.body;
 
     try {
         const t = await sequelize.transaction();
 
         await User.update({
-            userId: userId,
             password: password, 
             userName: name,
             userEmail: email
@@ -311,7 +248,8 @@ const profile_update_process = async (req, res) => {
             sub_region: sub_region,
             street: street,
             detail_address: detail_address,
-            zonecode: zonecode
+            zonecode: zonecode,
+            full_address: full_address
         }, {
             where: {
                 userId: userId
@@ -334,18 +272,7 @@ const profile_update_process = async (req, res) => {
             }
         })
 
-        var full_address = '';
-
-        if (address.region) {
-            full_address += address.region + ' ';
-        }
-
-        if (address.sub_region) {
-            full_address += address.sub_region + ' ';
-        }
-
-        // 공백을 마지막에 하나만 남기도록 처리
-        full_address = full_address.trim();
+        var sim_address = address.region + ' ' + address.sub_region;
 
         res.status(200).json({
             message: "user information updated successfully",
@@ -353,7 +280,7 @@ const profile_update_process = async (req, res) => {
             password: user.password,
             name: user.userName,
             email: user.userEmail,
-            address: full_address
+            address: sim_address
         })
     } catch(err) {
         console.log(`error: ${err}`);
@@ -421,20 +348,6 @@ const history = async (req, res) => {
               ]
             }
           });
-            // const wastes = await Waste_fees.findAll({
-            //     where: {
-            //         region: address.region,
-            //         sub_region: address.sub_region,
-            //         [Sequelize.Op.and]: [
-            //           Sequelize.where(
-            //             Sequelize.fn('REGEXP_REPLACE', Sequelize.col('waste_name'), '\\(.*?\\)', ''),
-            //             {
-            //               [Sequelize.Op.like]: `%${all_images_plain[i].waste_name}%`,
-            //             }
-            //           )
-            //         ]
-            //       }
-            // })
             console.log(`wastes: ${wastes[0].fee}`);
 
             // waste_fee를 배열로 저장
