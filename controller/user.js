@@ -225,7 +225,7 @@ const profile_update = async (req, res) => {
 }
 
 const profile_update_process = async (req, res) => {
-    const org_userId = req.userId;
+    const userId = req.userId;
     const { password, name, email, region, sub_region, street, detail_address, zonecode, full_address } = req.body;
 
     try {
@@ -237,7 +237,7 @@ const profile_update_process = async (req, res) => {
             userEmail: email
         }, {
             where: {
-                userId: org_userId
+                userId: userId
             }
         }, {
             transaction: t
