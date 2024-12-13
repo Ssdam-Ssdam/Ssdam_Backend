@@ -231,11 +231,6 @@ const profile_update_process = async (req, res) => {
     try {
         const t = await sequelize.transaction();
 
-        // 주소가 전달되지 않았다면 기존 주소를 유지
-        const updatedRegion = region ? region : user.region;
-        const updatedSubRegion = sub_region ? sub_region : user.sub_region;
-        const updatedStreet = street ? street : user.street;
-
         await User.update({
             password: password, 
             userName: name,
@@ -247,6 +242,17 @@ const profile_update_process = async (req, res) => {
         }, {
             transaction: t
         });
+
+        const org_address = await Address.findOne({
+            where: {
+                userId: userId
+            }
+        })
+
+        // 주소가 전달되지 않았다면 기존 주소를 유지
+        const updatedRegion = region ? region : org_address.region;
+        const updatedSubRegion = sub_region ? sub_region : org_address.sub_region;
+        const updatedStreet = street ? street : org_address.street;
 
         await Address.update({
             region: updatedRegion,
