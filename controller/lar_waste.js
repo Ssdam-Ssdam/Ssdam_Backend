@@ -120,7 +120,6 @@ const nearbyStores = async (req, res) => {
             }
         })
 
-        const user_address = address.region + ' ' + address.sub_region + ' ' + address.street;
         const targetKey = Object.keys(area_data[address.region]).find((key) =>
             address.sub_region.includes(key)
           );
@@ -133,9 +132,9 @@ const nearbyStores = async (req, res) => {
                 message: "A map of the area is still being prepared."
             })
         } else {
-            const { latitude, longitude } = await getCoordinates(user_address);
+            const { latitude, longitude } = await getCoordinates(address.full_address);
 
-            const locations = await getClosestLocations(user_address, csvFilePath);
+            const locations = await getClosestLocations(address.full_address, csvFilePath);
 
             // 사용자의 주소 좌표 변경 결과
             console.log(`lat: ${latitude}, lon: ${longitude}`);
@@ -166,7 +165,7 @@ const upload_img = async (req, res) => {
         const form = new FormData();
         form.append('file', image);
     
-        const response = await axios.post('http://localhost:8000/predict', form, { // 배포시 파이썬 서버 주소로 변경
+        const response = await axios.post(`http://${process.env.HOST}:8000/predict`, form, { // 배포시 파이썬 서버 주소로 변경
             headers: {
                 ...form.getHeaders()
             }

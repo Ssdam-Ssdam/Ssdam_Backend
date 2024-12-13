@@ -68,7 +68,7 @@ if __name__ == "__main__":
         # 사용자 입력 값 읽기
         userInput = sys.argv[1]
         image_path = userInput  # 첫 번째 인자: 이미지 경로
-        model_path = "../ai_data/best_trained_model_fin.pth"  # 두 번째 인자: 모델 경로
+        model_path = "./best_trained_model_fin.pth"  # 두 번째 인자: 모델 경로
         
         # 예측 수행
         pred_class, entropy = predict(image_path, model_path)
