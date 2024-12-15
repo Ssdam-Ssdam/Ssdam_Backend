@@ -20,13 +20,13 @@ const inquiryAdmin = {
             if (inquiries.length === 0) {
                 return res.status(200).json({
                     message: "등록된 문의사항이 없습니다.",
-                    data: []
+                    inquiries: []
                 });
             }
 
             res.status(200).json({
                 message: "문의사항 전체 조회 성공",
-                data: inquiries
+                inquiries: inquiries
             });
         } catch (error) {
             console.error('문의사항 조회 에러:', error);
@@ -44,7 +44,14 @@ const inquiryAdmin = {
         try {
             // 해당 문의사항이 존재하는지 확인
             const inquiry = await Inquiry.findOne({
-                where: { inquiryId }
+            where: { inquiryId },
+                include: [
+                    {
+                        model: User,
+                        as: 'UserInquiry',  // 작성자 정보
+                        attributes: ['userName']
+                    }
+                ]
             });
 
             if (!inquiry) {
@@ -68,10 +75,12 @@ const inquiryAdmin = {
 
             res.status(200).json({
                 message: "문의사항 답변이 성공적으로 등록되었습니다.",
-                data: {
+                inquiry: {
                     inquiryId: inquiry.inquiryId,
                     title: inquiry.title,
                     content: inquiry.content,
+                    userName: inquiry.UserInquiry ? inquiry.UserInquiry.userName : '알 수 없음', // 작성자 이름
+                    created_at: inquiry.created_at,
                     res_message: inquiry.res_message,
                     res_date: inquiry.res_date,
                     res_status: inquiry.res_status
@@ -116,10 +125,12 @@ const inquiryAdmin = {
 
             res.status(200).json({
                 message: "문의사항 답변이 성공적으로 수정되었습니다.",
-                data: {
+                inquiry: {
                     inquiryId: inquiry.inquiryId,
                     title: inquiry.title,
                     content: inquiry.content,
+                    userName: inquiry.UserInquiry ? inquiry.UserInquiry.userName : '알 수 없음', // 작성자 이름
+                    created_at: inquiry.created_at,
                     res_message: inquiry.res_message,
                     res_date: inquiry.res_date,
                     res_status: inquiry.res_status
@@ -147,7 +158,14 @@ const inquiryAdmin = {
         try {
             // 해당 문의사항이 존재하는지 확인
             const inquiry = await Inquiry.findOne({
-                where: { inquiryId }
+                where: { inquiryId },
+                include: [
+                    {
+                        model: User,
+                        as: 'UserInquiry',  // 작성자 정보
+                        attributes: ['userName']
+                    }
+                ]
             });
             if (!inquiry) {
                 return res.status(404).json({
@@ -159,7 +177,12 @@ const inquiryAdmin = {
 
             res.status(200).json({
                 message: "문의사항이 성공적으로 삭제되었습니다.",
-                data: { inquiryId }
+                inquiry: {
+                    inquiryId: inquiry.inquiryId,
+                    title: inquiry.title,
+                    userName: inquiry.UserInquiry ? inquiry.UserInquiry.userName : '알 수 없음', // 작성자 이름
+                    created_at: inquiry.created_at // 생성일
+                }
             });
         } catch (error) {
             console.error('문의사항 삭제 에러:', error);

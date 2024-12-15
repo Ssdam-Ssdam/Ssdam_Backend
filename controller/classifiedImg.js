@@ -17,10 +17,10 @@ const classifiedImg = {
             });
 
             if (images.length === 0) {
-                return res.status(200).json({ message: '조회된 이미지가 없습니다.', data: [] });
+                return res.status(200).json({ message: '조회된 이미지가 없습니다.', images: [] });
             }
 
-            return res.status(200).json({ message: '이미지 조회 성공', data: images });
+            return res.status(200).json({ message: '이미지 조회 성공', images: images });
         } catch (error) {
             console.error('이미지 조회 에러:', error);
             return res.status(500).json({ message: '이미지 조회 중 오류가 발생했습니다.', error: error.message });

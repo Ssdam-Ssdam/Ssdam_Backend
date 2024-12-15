@@ -24,10 +24,10 @@ const feedback = {
             });
 
             if (feedbacks.length === 0) {
-                return res.status(200).json({ message: '조회된 피드백이 없습니다.', data: [] });
+                return res.status(200).json({ message: '조회된 피드백이 없습니다.', feedbacks: [] });
             }
 
-            return res.status(200).json({ message: '피드백 조회 성공', data: feedbacks });
+            return res.status(200).json({ message: '피드백 조회 성공', feedbacks: feedbacks });
         } catch (error) {
             console.error('피드백 조회 에러:', error);
             return res.status(500).json({ message: '피드백 조회 중 오류가 발생했습니다.', error: error.message });
